@@ -1,0 +1,22 @@
+Package: twentytwentyoneforecast
+Title: 2021 Yukon River Chinook Run Timing Forecast
+Version: 0.0.0.9000
+Authors@R:
+    person(given = "Bryce",
+           family = "Mecum",
+           role = c("aut", "cre"),
+           email = "brycemecum@gmail.com",
+           comment = c(ORCID = "0000-0002-0381-3766"))
+Description: Data and code for the 2021 Yukon River Chinook Run Timing Forecast.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.1
+Imports:
+    dplyr,
+    DT,
+    ggplot2,
+    ggtext,
+    knitr,
+    patchwork,
+    readr
