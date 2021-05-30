@@ -422,7 +422,10 @@ ggsave("figures/predicted_vs_observed.png",
   width = 4,
   height = 4
 )
+predicted_vs_observed
 ```
+
+![](pre-season-forecast_files/figure-gfm/predicted_vs_observed-1.png)<!-- -->
 
 ``` r
 forecast_timeseries <- ggplot(hindcast, aes(year, diff)) +
@@ -435,4 +438,7 @@ forecast_timeseries <- ggplot(hindcast, aes(year, diff)) +
     caption = "Hindcasted residuals for the 50% point of run timing (MDJ), 1980–2020.<br>Horizontal line indicates a perfect forecast."
   ) +
   theme(plot.caption = element_markdown())
+forecast_timeseries
 ```
+
+![](pre-season-forecast_files/figure-gfm/forecast_timeseries-1.png)<!-- -->

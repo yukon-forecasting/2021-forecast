@@ -286,6 +286,7 @@ ggsave("figures/predicted_vs_observed.png",
   width = 4,
   height = 4
 )
+predicted_vs_observed
 ```
 
 ```{r forecast_timeseries}
@@ -299,4 +300,5 @@ forecast_timeseries <- ggplot(hindcast, aes(year, diff)) +
     caption = "Hindcasted residuals for the 50% point of run timing (MDJ), 1980–2020.<br>Horizontal line indicates a perfect forecast."
   ) +
   theme(plot.caption = element_markdown())
+forecast_timeseries
 ```
