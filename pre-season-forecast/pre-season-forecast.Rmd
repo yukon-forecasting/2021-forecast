@@ -3,7 +3,6 @@ title: "2021 Pre-Season Forecast"
 output:
   github_document:
     keep_html: true
-always_allow_html: true
 ---
 
 ```{r packages, message=FALSE}
@@ -12,7 +11,6 @@ library(dplyr)
 library(ggplot2)
 library(readr)
 library(patchwork)
-library(DT)
 library(ggtext)
 ```
 
@@ -40,9 +38,9 @@ yukon <- left_join(environment, cpue)
 
 ```{r amatcfigure, warning=FALSE}
 p_amatc <- ggplot(yukon, aes(amatc, mdj)) +
-  geom_point(shape=1) +
-  geom_vline(xintercept = yukon[which(yukon$year == forecast_year),"amatc"][[1]]) +
-  labs(x = expression("AMATC,"*~degree*"C"), y = "MDJ (June)")
+  geom_point(shape = 1) +
+  geom_vline(xintercept = yukon[which(yukon$year == forecast_year), "amatc"][[1]]) +
+  labs(x = expression("AMATC," * ~ degree * "C"), y = "MDJ (June)")
 
 ggsave("./figures/mdj_against_amatc.png", width = 4, height = 4)
 ```
@@ -52,8 +50,8 @@ ggsave("./figures/mdj_against_amatc.png", width = 4, height = 4)
 ```{r msstcfigure, warning=FALSE}
 p_msstc <- ggplot(yukon, aes(msstc, mdj)) +
   geom_point(shape = 1) +
-  geom_vline(xintercept = yukon[which(yukon$year == forecast_year),"msstc"][[1]]) +
-  labs(x = expression("MSSTC,"*~degree*"C"), y = NULL)
+  geom_vline(xintercept = yukon[which(yukon$year == forecast_year), "msstc"][[1]]) +
+  labs(x = expression("MSSTC," * ~ degree * "C"), y = NULL)
 
 ggsave("./figures/mdj_against_msstc.png", width = 4, height = 4)
 ```
@@ -62,12 +60,14 @@ ggsave("./figures/mdj_against_msstc.png", width = 4, height = 4)
 
 ```{r picefigure, warning=FALSE}
 p_pice <- ggplot(yukon, aes(pice, mdj)) +
-  geom_point(shape=1) +
-  geom_vline(xintercept = yukon[which(yukon$year == forecast_year),"pice"][[1]]) +
+  geom_point(shape = 1) +
+  geom_vline(xintercept = yukon[which(yukon$year == forecast_year), "pice"][[1]]) +
   scale_x_continuous(limits = c(0, 1.0)) +
-  labs(x = "PICE", 
-       y = NULL,
-       caption = "MDJ against AMATC, MSSTC, and PICE, 1961–2020.<br>Solid vertical line marks the 2021 value for each variable.") +
+  labs(
+    x = "PICE",
+    y = NULL,
+    caption = "MDJ against AMATC, MSSTC, and PICE, 1961–2020.<br>Solid vertical line marks the 2021 value for each variable."
+  ) +
   theme(plot.caption = element_markdown())
 
 ggsave("./figures/mdj_against_pice.png", width = 4, height = 4)
@@ -83,14 +83,14 @@ p1 <- ggplot(yukon, aes(year, amatc)) +
   geom_line() +
   geom_point(data = subset(yukon, year == forecast_year)) +
   geom_hline(yintercept = mean(yukon[yukon$year < forecast_year, "amatc"][[1]])) +
-  labs(y = expression("AMATC,"*~degree*"C")) +
+  labs(y = expression("AMATC," * ~ degree * "C")) +
   theme(axis.title.x = element_blank())
 
 p2 <- ggplot(yukon, aes(year, msstc)) +
   geom_line() +
   geom_point(data = subset(yukon, year == forecast_year)) +
   geom_hline(yintercept = mean(yukon[yukon$year < forecast_year, "msstc"][[1]])) +
-  labs(y = expression("MSSTC,"*~degree*"C")) +
+  labs(y = expression("MSSTC," * ~ degree * "C")) +
   theme(axis.title.x = element_blank())
 
 p3 <- ggplot(yukon, aes(year, pice)) +
@@ -98,9 +98,11 @@ p3 <- ggplot(yukon, aes(year, pice)) +
   geom_point(data = subset(yukon, year == forecast_year)) +
   geom_hline(yintercept = mean(yukon[yukon$year < forecast_year, "pice"][[1]], na.rm = TRUE)) +
   scale_y_continuous(limits = c(0, 1)) +
-  labs(caption = "Time series of AMATC, MSSTC, and PICE, 1961–2021.<br>Solid circle mark indicates each series' value in 2021.",
-       x = "Year",
-       y = "PICE") +
+  labs(
+    caption = "Time series of AMATC, MSSTC, and PICE, 1961–2021.<br>Solid circle mark indicates each series' value in 2021.",
+    x = "Year",
+    y = "PICE"
+  ) +
   theme(plot.caption = element_markdown())
 
 timeseries_3p <- p1 / p2 / p3
@@ -114,13 +116,15 @@ timeseries_3p
 ### Model Selection
 
 ```{r models}
-models <- c("mdj ~ amatc",
-            "mdj ~ msstc",
-            "mdj ~ pice",
-            "mdj ~ amatc + msstc",
-            "mdj ~ amatc + pice",
-            "mdj ~ msstc + pice",
-            "mdj ~ amatc + msstc + pice")
+models <- c(
+  "mdj ~ amatc",
+  "mdj ~ msstc",
+  "mdj ~ pice",
+  "mdj ~ amatc + msstc",
+  "mdj ~ amatc + pice",
+  "mdj ~ msstc + pice",
+  "mdj ~ amatc + msstc + pice"
+)
 models
 ```
 
@@ -132,51 +136,52 @@ hindcast_years <- seq(forecast_year - hindcast_window, forecast_year - 1)
 round_method <- floor # Floor predictions
 
 hindcast_year <- function(data, model, forecast_year) {
-  training_data <- data[data$year < forecast_year,]
+  training_data <- data[data$year < forecast_year, ]
   training_model <- lm(formula(model), training_data)
-  
-  new_data <- data[data$year == forecast_year,]
-  prediction <- predict(training_model, newdata = new_data, se.fit=TRUE)
+
+  new_data <- data[data$year == forecast_year, ]
+  prediction <- predict(training_model, newdata = new_data, se.fit = TRUE)
   prediction_fit <- round_method(prediction$fit[[1]])
   prediction_interval <- prediction_fit + c(-2, 2) * qnorm(0.975) *
     prediction$se.fit[[1]]
-  
+
   actual <- new_data$mdj
   in_interval <- actual >= round_method(prediction_interval[1]) &&
     actual <= round_method(prediction_interval[2])
-  
+
   data.frame(
-    "formula"=model,
-    "year"=forecast_year,
-    "predicted"=(prediction_fit),
-    "observed"=actual,
-    "diff"=prediction_fit-actual,
-    "predict_se"=prediction$se.fit[[1]],
-    "in_interval"=in_interval,
-    "int_lower"=prediction_interval[1],
-    "int_upper"=prediction_interval[2],
-    "int_width"=prediction_interval[2] -
-      prediction_interval[1])
+    "formula" = model,
+    "year" = forecast_year,
+    "predicted" = (prediction_fit),
+    "observed" = actual,
+    "diff" = prediction_fit - actual,
+    "predict_se" = prediction$se.fit[[1]],
+    "in_interval" = in_interval,
+    "int_lower" = prediction_interval[1],
+    "int_upper" = prediction_interval[2],
+    "int_width" = prediction_interval[2] -
+      prediction_interval[1]
+  )
 }
 
 hindcast_model <- function(data, model, years, summarize = TRUE) {
   result <- lapply(years, function(year) {
     hindcast_year(data, model, year)
   })
-  
+
   model_result <- do.call(rbind, result)
-  
+
   if (!summarize) {
     return(model_result)
   }
-  
+
   data.frame(
     model = model,
-    "MAPE"=round(mean(abs(model_result$predicted - model_result$observed)), 2),
-    "SDMAPE"=round(sd(abs(model_result$predicted - model_result$observed)), 2),
-    "width"=round(mean(model_result$int_width), 2),
-    "p.in"=round(sum(model_result$in_interval) / length(model_result$in_interval), 2),
-    "absmax"=max(abs(model_result$predicted - model_result$observed)),
+    "MAPE" = round(mean(abs(model_result$predicted - model_result$observed)), 2),
+    "SDMAPE" = round(sd(abs(model_result$predicted - model_result$observed)), 2),
+    "width" = round(mean(model_result$int_width), 2),
+    "p.in" = round(sum(model_result$in_interval) / length(model_result$in_interval), 2),
+    "absmax" = max(abs(model_result$predicted - model_result$observed)),
     "meanbias" = round(mean(model_result$predicted - model_result$observed), 2)
   )
 }
@@ -185,12 +190,12 @@ hindcast_models <- function(data, models, years) {
   result <- lapply(models, function(model) {
     hindcast_model(data, model, years)
   })
-  
+
   do.call(rbind, result)
 }
 
 model_selection_result <- hindcast_models(yukon, models, hindcast_years)
-datatable(model_selection_result)
+kable(model_selection_result)
 write.csv(model_selection_result, file = "./output/model_select.csv")
 ```
 
@@ -199,7 +204,7 @@ write.csv(model_selection_result, file = "./output/model_select.csv")
 ```{r predictfifdj}
 model_fifdj <- lm(fifdj ~ amatc + msstc + pice, data = subset(yukon, year < forecast_year))
 summary(model_fifdj)
-prediction_fifdj <- floor(predict(model_fifdj, newdata = yukon[yukon$year == forecast_year,]))
+prediction_fifdj <- floor(predict(model_fifdj, newdata = yukon[yukon$year == forecast_year, ]))
 ```
 
 ### 25%
@@ -207,7 +212,7 @@ prediction_fifdj <- floor(predict(model_fifdj, newdata = yukon[yukon$year == for
 ```{r predictqdj}
 model_qdj <- lm(qdj ~ amatc + msstc + pice, data = subset(yukon, year < forecast_year))
 summary(model_qdj)
-prediction_qdj <- floor(predict(model_qdj, newdata = yukon[yukon$year == forecast_year,]))
+prediction_qdj <- floor(predict(model_qdj, newdata = yukon[yukon$year == forecast_year, ]))
 ```
 
 ### 50%
@@ -215,14 +220,18 @@ prediction_qdj <- floor(predict(model_qdj, newdata = yukon[yukon$year == forecas
 ```{r predictmdj}
 model_mdj <- lm(mdj ~ amatc + msstc + pice, data = subset(yukon, year < forecast_year))
 summary(model_mdj)
-prediction_mdj <- floor(predict(model_mdj, newdata = yukon[yukon$year == forecast_year,]))
+prediction_mdj <- floor(predict(model_mdj, newdata = yukon[yukon$year == forecast_year, ]))
 ```
 
 ```{r allpredictions}
-predictions <- data.frame(percentile = c("fifdj", "qdj", "mdj"),
-                          prediction = as.integer(c(prediction_fifdj,
-                                         prediction_qdj,
-                                         prediction_mdj)))
+predictions <- data.frame(
+  percentile = c("fifdj", "qdj", "mdj"),
+  prediction = as.integer(c(
+    prediction_fifdj,
+    prediction_qdj,
+    prediction_mdj
+  ))
+)
 write_csv(predictions, file = "./output/predictions.csv")
 kable(predictions)
 ```
@@ -230,19 +239,25 @@ kable(predictions)
 # Historical Comparisons
 
 ```{r historicalcomparisons}
-long_term_means <- data.frame(variable = c("AMATC", "MSSTC", "PICE"),
-                              current_year_value = c(mean(yukon$amatc[which(yukon$year == forecast_year)]),
-                                                 mean(yukon$msstc[which(yukon$year == forecast_year)]),
-                                                 mean(yukon$pice[which(yukon$year == forecast_year)], na.rm = TRUE)),
-                              long_term_mean = c(mean(yukon$amatc[which(yukon$year < forecast_year)]),
-                                                 mean(yukon$msstc[which(yukon$year < forecast_year)]),
-                                                 mean(yukon$pice[which(yukon$year < forecast_year)], na.rm = TRUE))
-                              )
+long_term_means <- data.frame(
+  variable = c("AMATC", "MSSTC", "PICE"),
+  current_year_value = c(
+    mean(yukon$amatc[which(yukon$year == forecast_year)]),
+    mean(yukon$msstc[which(yukon$year == forecast_year)]),
+    mean(yukon$pice[which(yukon$year == forecast_year)], na.rm = TRUE)
+  ),
+  long_term_mean = c(
+    mean(yukon$amatc[which(yukon$year < forecast_year)]),
+    mean(yukon$msstc[which(yukon$year < forecast_year)]),
+    mean(yukon$pice[which(yukon$year < forecast_year)], na.rm = TRUE)
+  )
+)
 long_term_means$cur_minus_ltm <- long_term_means$current_year_value - long_term_means$long_term_mean
 long_term_means$range <- c(
   paste(range(yukon$amatc[which(yukon$year < forecast_year)]), collapse = " to "),
   paste(range(yukon$msstc[which(yukon$year < forecast_year)]), collapse = " to "),
-  paste(range(yukon$pice[which(yukon$year < forecast_year)], na.rm = TRUE), collapse = " to "))
+  paste(range(yukon$pice[which(yukon$year < forecast_year)], na.rm = TRUE), collapse = " to ")
+)
 kable(long_term_means)
 ```
 
@@ -251,31 +266,37 @@ hindcast <- hindcast_model(yukon, "mdj ~ amatc + msstc + pice", 1980:2020, summa
 ```
 
 ```{r predicted_vs_observed}
-predicted_vs_observed <- ggplot(hindcast, aes(observed, predicted)) + 
+predicted_vs_observed <- ggplot(hindcast, aes(observed, predicted)) +
   geom_point(shape = 1) +
-  annotate(geom = "segment", 
-           x = min(c(hindcast$observed, hindcast$predicted)), 
-           y = min(c(hindcast$observed, hindcast$predicted)), 
-           xend = max(c(hindcast$observed, hindcast$predicted)), 
-           yend = max(c(hindcast$observed, hindcast$predicted))) +
-  labs(x = "Observed MDJ (June)",
-       y = "Predicted MDJ (June)",
-       caption = "Predicted vs. observed 50% point of run timing (MDJ), 1980–2020.<br>Performed by hindcasting. Solid diagonal line marks a perfect forecast.") +
+  annotate(
+    geom = "segment",
+    x = min(c(hindcast$observed, hindcast$predicted)),
+    y = min(c(hindcast$observed, hindcast$predicted)),
+    xend = max(c(hindcast$observed, hindcast$predicted)),
+    yend = max(c(hindcast$observed, hindcast$predicted))
+  ) +
+  labs(
+    x = "Observed MDJ (June)",
+    y = "Predicted MDJ (June)",
+    caption = "Predicted vs. observed 50% point of run timing (MDJ), 1980–2020.<br>Performed by hindcasting. Solid diagonal line marks a perfect forecast."
+  ) +
   theme(plot.caption = element_markdown())
-ggsave("figures/predicted_vs_observed.png", 
-       predicted_vs_observed,
-       width = 4,
-       height = 4)
+ggsave("figures/predicted_vs_observed.png",
+  predicted_vs_observed,
+  width = 4,
+  height = 4
+)
 ```
 
 ```{r forecast_timeseries}
-forecast_timeseries <- ggplot(hindcast, aes(year, diff)) + 
+forecast_timeseries <- ggplot(hindcast, aes(year, diff)) +
   geom_line() +
   geom_point() +
   annotate(geom = "segment", x = min(hindcast$year), xend = max(hindcast$year), y = 0, yend = 0) +
-  labs(x = "Year", 
-       y = "Predicted - Observed",
-       caption = "Hindcasted residuals for the 50% point of run timing (MDJ), 1980–2020.<br>Horizontal line indicates a perfect forecast.") +
+  labs(
+    x = "Year",
+    y = "Predicted - Observed",
+    caption = "Hindcasted residuals for the 50% point of run timing (MDJ), 1980–2020.<br>Horizontal line indicates a perfect forecast."
+  ) +
   theme(plot.caption = element_markdown())
-
 ```
