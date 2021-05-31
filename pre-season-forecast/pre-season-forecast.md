@@ -86,11 +86,8 @@ p_pice <- ggplot(yukon, aes(pice, mdj)) +
   scale_x_continuous(limits = c(0, 1.0)) +
   labs(
     x = "PICE",
-    y = NULL,
-    caption = "MDJ against AMATC, MSSTC, and PICE, 1961–2020.<br>Solid vertical line marks the 2021 value for each variable."
-  ) +
-  theme(plot.caption = element_markdown())
-
+    y = NULL)
+  
 ggsave("./figures/mdj_against_pice.png", width = 4, height = 4)
 
 p_amatc + p_msstc + p_pice
@@ -125,12 +122,9 @@ p3 <- ggplot(yukon, aes(year, pice)) +
   geom_hline(yintercept = mean(yukon[yukon$year < forecast_year, "pice"][[1]], na.rm = TRUE)) +
   scale_y_continuous(limits = c(0, 1)) +
   labs(
-    caption = "Time series of AMATC, MSSTC, and PICE, 1961–2021.<br>Solid circle mark indicates each series' value in 2021.",
     x = "Year",
     y = "PICE"
-  ) +
-  theme(plot.caption = element_markdown())
-
+  )
 timeseries_3p <- p1 / p2 / p3
 ggsave("./figures/timseries_3p.png", timeseries_3p, width = 8, height = 6)
 
@@ -178,7 +172,10 @@ hindcast_year <- function(data, model, forecast_year) {
   prediction_interval <- prediction_fit + c(-2, 2) * qnorm(0.975) *
     prediction$se.fit[[1]]
 
-  actual <- new_data$mdj
+  # Extract response
+  response_var = dimnames(attr(terms(as.formula(model)), "factors"))[[1]][1]
+  actual <- new_data[[response_var]]
+  
   in_interval <- actual >= round_method(prediction_interval[1]) &&
     actual <= round_method(prediction_interval[2])
 
@@ -368,6 +365,8 @@ kable(predictions)
 
 # Historical Comparisons
 
+## Long Term Means
+
 ``` r
 long_term_means <- data.frame(
   variable = c("AMATC", "MSSTC", "PICE"),
@@ -397,13 +396,48 @@ kable(long_term_means)
 | MSSTC    |           -2.0833280 |       -0.4491667 |      -1.6341613 | -3.8 to 2.8    |
 | PICE     |            0.5594381 |        0.5440980 |       0.0153401 | 0.078 to 0.784 |
 
-``` r
-hindcast <- hindcast_model(yukon, "mdj ~ amatc + msstc + pice", 1980:2020, summarize = FALSE)
-```
+## Hindcast all three models
 
 ``` r
+hindcast_fifdj <- hindcast_model(yukon, "fifdj ~ amatc + msstc + pice", hindcast_years)
+hindcast_qdj <- hindcast_model(yukon, "qdj ~ amatc + msstc + pice", hindcast_years)
+hindcast_mdj <- hindcast_model(yukon, "mdj ~ amatc + msstc + pice", hindcast_years)
+
+hindcast_all_percentiles <- rbind(
+  hindcast_fifdj,
+  hindcast_qdj,
+  hindcast_mdj)
+write_csv(hindcast_all_percentiles, "output/hindcast_all_models.csv")
+kable(hindcast_all_percentiles)
+```
+
+| model                         | MAPE | SDMAPE | width | p.in | absmax | meanbias |
+|:------------------------------|-----:|-------:|------:|-----:|-------:|---------:|
+| fifdj \~ amatc + msstc + pice | 2.33 |   2.26 |  8.35 | 0.93 |      8 |    -1.53 |
+| qdj \~ amatc + msstc + pice   | 2.13 |   2.47 |  7.81 | 0.80 |      9 |    -1.60 |
+| mdj \~ amatc + msstc + pice   | 2.20 |   1.93 |  8.33 | 0.87 |      6 |    -1.93 |
+
+``` r
+hindcast_models <- c(
+  "fifdj ~ amatc + msstc + pice",
+  "qdj ~ amatc + msstc + pice",
+  "mdj ~ amatc + msstc + pice"
+)
+hindcast <- do.call(rbind, lapply(hindcast_models, function(model) {
+  hindcast_model(yukon, model, hindcast_years, summarize = FALSE)
+
+}))
+
+hindcast$formula <- toupper(hindcast$formula)
+hindcast$formula <- ordered(hindcast$formula, c(
+  "FIFDJ ~ AMATC + MSSTC + PICE",
+  "QDJ ~ AMATC + MSSTC + PICE", 
+  "MDJ ~ AMATC + MSSTC + PICE"
+))
 predicted_vs_observed <- ggplot(hindcast, aes(observed, predicted)) +
   geom_point(shape = 1) +
+  scale_shape_manual(values = c(1, 19)) +
+  facet_wrap(~ formula) +
   annotate(
     geom = "segment",
     x = min(c(hindcast$observed, hindcast$predicted)),
@@ -412,15 +446,15 @@ predicted_vs_observed <- ggplot(hindcast, aes(observed, predicted)) +
     yend = max(c(hindcast$observed, hindcast$predicted))
   ) +
   labs(
-    x = "Observed MDJ (June)",
-    y = "Predicted MDJ (June)",
-    caption = "Predicted vs. observed 50% point of run timing (MDJ), 1980–2020.<br>Performed by hindcasting. Solid diagonal line marks a perfect forecast."
-  ) +
-  theme(plot.caption = element_markdown())
+    x = "Observed (June)",
+    y = "Predicted (June)"  ) +
+  theme(strip.background = element_rect(fill=NA, colour=NA),
+        strip.text = element_text(hjust = 0))
+
 ggsave("figures/predicted_vs_observed.png",
   predicted_vs_observed,
-  width = 4,
-  height = 4
+  width = 8,
+  height = 3
 )
 predicted_vs_observed
 ```
@@ -434,10 +468,8 @@ forecast_timeseries <- ggplot(hindcast, aes(year, diff)) +
   annotate(geom = "segment", x = min(hindcast$year), xend = max(hindcast$year), y = 0, yend = 0) +
   labs(
     x = "Year",
-    y = "Predicted - Observed",
-    caption = "Hindcasted residuals for the 50% point of run timing (MDJ), 1980–2020.<br>Horizontal line indicates a perfect forecast."
-  ) +
-  theme(plot.caption = element_markdown())
+    y = "Predicted - Observed"
+  )
 forecast_timeseries
 ```
 
