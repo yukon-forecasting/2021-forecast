@@ -276,7 +276,7 @@ write_csv(hindcast_all_percentiles, "output/hindcast_all_models.csv")
 kable(hindcast_all_percentiles)
 ```
 
-```{r predicted_vs_observed}
+```{r predicted_vs_observed, fig.width=8, fig.height=3}
 
 hindcast_models <- c(
   "fifdj ~ amatc + msstc + pice",
@@ -319,10 +319,11 @@ ggsave("figures/predicted_vs_observed.png",
 predicted_vs_observed
 ```
 
-```{r forecast_timeseries}
+```{r forecast_timeseries, fig.width=4, fig.height=2}
 forecast_timeseries <- ggplot(hindcast, aes(year, diff)) +
   geom_line() +
   geom_point() +
+  facet_wrap(~ formula, ncol = 1) +
   annotate(geom = "segment", x = min(hindcast$year), xend = max(hindcast$year), y = 0, yend = 0) +
   labs(
     x = "Year",

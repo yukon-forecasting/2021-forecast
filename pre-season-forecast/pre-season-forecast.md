@@ -465,6 +465,7 @@ predicted_vs_observed
 forecast_timeseries <- ggplot(hindcast, aes(year, diff)) +
   geom_line() +
   geom_point() +
+  facet_wrap(~ formula, ncol = 1) +
   annotate(geom = "segment", x = min(hindcast$year), xend = max(hindcast$year), y = 0, yend = 0) +
   labs(
     x = "Year",
