@@ -26,8 +26,8 @@ theme_set(theme_bw())
 ## Data
 
 ```{r data}
-environment <- read_csv("../../data/environment/environment.csv")
-cpue <- read_csv("../../data/cpue/cpue.csv")
+environment <- read_csv("https://raw.githubusercontent.com/yukon-forecasting/data/82e164699e0c5706c457824960be3bb87c42dd85/data/environment/environment.csv")
+cpue <- read_csv("https://raw.githubusercontent.com/yukon-forecasting/data/82e164699e0c5706c457824960be3bb87c42dd85/data/cpue/cpue.csv")
 yukon <- left_join(environment, cpue)
 ```
 
