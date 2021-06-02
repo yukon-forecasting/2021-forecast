@@ -22,7 +22,7 @@ theme_set(theme_bw())
 ## Data
 
 ``` r
-environment <- read_csv("../../data/environment/environment.csv")
+environment <- read_csv("https://raw.githubusercontent.com/yukon-forecasting/data/82e164699e0c5706c457824960be3bb87c42dd85/data/environment/environment.csv")
 ```
 
     ## 
@@ -35,7 +35,7 @@ environment <- read_csv("../../data/environment/environment.csv")
     ## )
 
 ``` r
-cpue <- read_csv("../../data/cpue/cpue.csv")
+cpue <- read_csv("https://raw.githubusercontent.com/yukon-forecasting/data/82e164699e0c5706c457824960be3bb87c42dd85/data/cpue/cpue.csv")
 ```
 
     ## 
@@ -96,7 +96,7 @@ p_amatc + p_msstc + p_pice
 ![](pre-season-forecast_files/figure-gfm/picefigure-1.png)<!-- -->
 
 ``` r
-ggsave("./figures/three_panel.png", width = 8, height = 3)
+ggsave("./figures/three_panel.png", width = 9, height = 3)
 ```
 
 ### Time series of AMATC, MSSTC, PICE
@@ -359,9 +359,9 @@ kable(predictions)
 
 | percentile | prediction |
 |:-----------|-----------:|
-| fifdj      |         16 |
-| qdj        |         19 |
-| mdj        |         24 |
+| fifdj      |         15 |
+| qdj        |         18 |
+| mdj        |         23 |
 
 # Historical Comparisons
 
@@ -390,11 +390,11 @@ long_term_means$range <- c(
 kable(long_term_means)
 ```
 
-| variable | current\_year\_value | long\_term\_mean | cur\_minus\_ltm | range          |
-|:---------|---------------------:|-----------------:|----------------:|:---------------|
-| AMATC    |           -5.8900000 |       -6.6170000 |       0.7270000 | -17.1 to 1.3   |
-| MSSTC    |           -2.0833280 |       -0.4491667 |      -1.6341613 | -3.8 to 2.8    |
-| PICE     |            0.5594381 |        0.5440980 |       0.0153401 | 0.078 to 0.784 |
+| variable | current_year_value | long_term_mean | cur_minus_ltm | range          |
+|:---------|-------------------:|---------------:|--------------:|:---------------|
+| AMATC    |             -5.890 |     -6.6170000 |      0.727000 | -17.1 to 1.3   |
+| MSSTC    |             -1.870 |     -0.4491667 |     -1.420833 | -3.8 to 2.8    |
+| PICE     |              0.537 |      0.5440980 |     -0.007098 | 0.078 to 0.784 |
 
 ## Hindcast all three models
 
