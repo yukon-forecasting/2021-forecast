@@ -13,7 +13,7 @@ logi_fun <- function(x, mu, s) { 1 / (1 + exp(-((x - mu)/s))) }
 # terrible optimizer. R is too good at optimizing this so I use the
 # fit_logistic.xls to find a reasonably good fit for the forecast dates. This
 # isn't a problem for the accuracy of the forecast or this chart.
-optim_result <- list(par = c(21.9352959, 4.950203657))
+optim_result <- list(par = c(23.00724348, 4.588998475))
 
 xrange <- -10:50
 cpue <- data.frame(day = xrange,
@@ -21,7 +21,7 @@ cpue <- data.frame(day = xrange,
                    pccpue = 100 * logi_fun(xrange, optim_result$par[1], optim_result$par[2]))
 
 # Write out
-write_csv(cpue, path = "pre-season-forecast/output/logistic_curve.csv")
+write_csv(cpue, file = "pre-season-forecast/output/logistic_curve.csv")
 
 predictions$percent <- c(15, 25, 50)
 predictions$label <- paste0(c(15, 25, 50), "%")
