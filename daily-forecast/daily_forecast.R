@@ -37,6 +37,7 @@ logistic_curve %>%
 predictions$percent <- c(15, 25, 50)
 predictions$label <- paste0(c(15, 25, 50), "%")
 predictions$date <- as.Date(predictions$prediction, format = "%j", origin = as.Date("2016-05-31"))
+predictions$date <- predictions$date + 5
 
 estimated$date <- as.Date(estimated$day, format = "%j", origin = as.Date("2016-05-31"))
 estimated$pccpue <- estimated$pccpue * 100
