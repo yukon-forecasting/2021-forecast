@@ -3,6 +3,12 @@ library(readr)
 library(tidyr)
 library(ggplot2)
 
+theme_set(theme_classic())
+
+# values for mu and s
+mus <- 10:30
+ss <- 3:7
+
 # Modeled v Estimated
 do_calc_modeled_v_estimated <- function(mu, s) {
   logi_fun <- function(x, mu, s) { 1 / (1 + exp(-((x - mu)/s))) }
@@ -28,7 +34,7 @@ do_calc_modeled_v_estimated <- function(mu, s) {
     gather(type, pccpue, -day)
 }
 
-crossing(mu = 10:30, s = 3:7) %>%
+crossing(mu = mus, s = ss) %>%
   purrr::pmap(~ do_calc_modeled_v_estimated(.x, .y) %>% mutate(mu = .x, s = .y)) %>%
   bind_rows() %>%
   ggplot(aes(day, pccpue, color = type)) +
@@ -41,9 +47,7 @@ ggsave("refit/figures/visual_refit.pdf", width = 10, height = 30)
 do_final_cpue <- function(mu, s) {
   logi_fun <- function(x, mu, s) { 1 / (1 + exp(-((x - mu)/s))) }
 
-  inseason <- read_csv("data/bedrift.csv") %>%
-    mutate(ccpue = cumsum(cpue))
-
+  inseason <- read_csv("data/bedrift.csv")
   xrange <- -10:50
   logistic <- data.frame(day = xrange,
                          cpue_modeleded = logi_fun(xrange, mu, s))
@@ -59,11 +63,10 @@ do_final_cpue <- function(mu, s) {
   final_cpue
 }
 
-crossing(mu = 17:30, s = 4:6) %>%
+crossing(mu = mus, s = ss) %>%
   purrr::pmap(~ do_final_cpue(.x, .y) %>% mutate(mu = .x, s = .y)) %>%
   bind_rows() %>%
   ggplot(aes(day, estimate)) +
-  geom_point() +
   geom_line() +
   facet_grid(mu ~ s, scales = "free")
 
