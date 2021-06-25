@@ -7,7 +7,9 @@ library(readr)
 library(dplyr)
 
 # Load data
-inseason <- read_csv("data/bedrift.csv")
+inseason <- read_csv("data/pilotsonar.csv") %>%
+  mutate(day = day - 3,
+         ccpue = cumsum(count))
 logistic_curve <- read_csv("pre-season-forecast/output/logistic_curve.csv")
 predictions <- read_csv("pre-season-forecast/output/predictions.csv")
 
