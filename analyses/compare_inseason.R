@@ -38,7 +38,7 @@ all_sites %>%
 
 # Plot
 
-comparison <- ggplot(all_sites %>% filter(source != "PILOTSONAR"), aes(day, count, linetype = source)) +
+comparison <- ggplot(all_sites, aes(day, count, linetype = source)) +
   geom_line() +
   labs(x = "Day of June",
        y = "% of Total")
