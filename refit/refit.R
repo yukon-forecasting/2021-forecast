@@ -9,7 +9,8 @@ library(tidyr)
 calculate_fit_rss <- function(mu, s) {
   logi_fun <- function(x, mu, s) { 1 / (1 + exp(-((x - mu)/s))) }
 
-  inseason <- read_csv("data/bedrift.csv")
+  inseason <- read_csv("data/bedrift.csv") %>%
+    mutate(ccpue = cumsum(cpue))
 
   xrange <- -10:50
   logistic <- data.frame(day = xrange,
