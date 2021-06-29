@@ -38,7 +38,6 @@ logistic_curve %>%
 predictions$percent <- c(15, 25, 50)
 predictions$label <- paste0(c(15, 25, 50), "%")
 predictions$date <- as.Date(predictions$prediction, format = "%j", origin = as.Date("2016-05-31"))
-predictions$date <- predictions$date + 5
 
 estimated$date <- as.Date(estimated$day, format = "%j", origin = as.Date("2016-05-31"))
 estimated$pccpue <- estimated$pccpue * 100
@@ -50,17 +49,20 @@ combined <- rbind(logistic_curve,
 combined$curve <- ordered(combined$curve, level = c("Modeled", "Estimated"))
 
 ggplot() +
-  geom_bar(data = predictions, aes(date, percent), stat = "identity", fill = NA, color = "black") +
-  geom_text(data = predictions, aes(date, percent, label = label), vjust = -1, size = 3) +
   geom_line(data = combined, aes(date, pccpue, color = curve)) +
-  scale_color_manual(values = c("black", "red")) +
+  geom_point(data = combined, aes(date, pccpue, shape = curve, color = curve)) +
+  scale_shape_manual(values = c(NA, 19)) +
+  scale_color_manual(values = c("slateblue", "cyan")) +
   labs(x = "Date", y = "Cumulative % CPUE") +
   theme_bw() +
-  theme(legend.position = c(.10,.85),
+  theme(legend.position = "right",
         legend.title = element_blank(),
-        legend.background = element_rect(fill = NULL, linetype = "solid", color = "black"))
+        legend.background = element_blank(),
+        legend.text.align = 1,
+        legend.margin = margin(0, 0, 0, 0),
+        legend.box.margin = margin(0, 0, 0, 0))
 
-ggsave("daily-forecast/figures/daily_forecast.png", width = 6, height = 3)
+ggsave("daily-forecast/figures/daily_forecast.png", width = 5, height = 2.5)
 
 # Chart 2: Finaly CPUE time series
 final_cpue <- data.frame(day = inseason$day,
