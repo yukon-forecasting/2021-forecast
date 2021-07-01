@@ -51,8 +51,8 @@ combined$curve <- ordered(combined$curve, level = c("Modeled", "Estimated"))
 ggplot() +
   geom_line(data = combined, aes(date, pccpue, color = curve)) +
   geom_point(data = combined, aes(date, pccpue, shape = curve, color = curve)) +
-  scale_shape_manual(values = c(NA, 19)) +
-  scale_color_manual(values = c("slateblue", "cyan")) +
+  scale_shape_manual(values = c(NA, 1)) +
+  scale_color_manual(values = c("black", "red")) +
   labs(x = "Date", y = "Cumulative % CPUE") +
   theme_bw() +
   theme(legend.position = "right",
