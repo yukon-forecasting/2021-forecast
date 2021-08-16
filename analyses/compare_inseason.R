@@ -36,6 +36,11 @@ all_sites %>%
   group_by(source) %>%
   mutate(count = count / sum(count)) -> all_sites
 
+# Crop to day 45
+# Based on my visual inspection
+all_sites %>%
+  filter(day <= 45) -> all_sites
+
 # Plot
 comparison <- ggplot(all_sites, aes(day, count, linetype = source)) +
   geom_line() +
