@@ -37,10 +37,20 @@ all_sites %>%
   mutate(count = count / sum(count)) -> all_sites
 
 # Plot
-
 comparison <- ggplot(all_sites, aes(day, count, linetype = source)) +
   geom_line() +
   labs(x = "Day of June",
        y = "% of Total")
 comparison
-ggsave("analyses/figures/comparison.png", comparison, width = 6, height=2)
+ggsave("analyses/figures/comparison.png", comparison, width = 6, height = 2)
+
+# Compare cumulative
+all_sites %>%
+  group_by(source) %>%
+  mutate(cumulative = cumsum(count)) %>%
+  mutate(pct_cumulative = cumulative / max(cumulative)) -> all_sites
+
+comparison_cumulative <- ggplot(all_sites, aes(day, pct_cumulative, linetype = source)) +
+  geom_line()
+
+ggsave("analyses/figures/comparison_cumulative.png", comparison_cumulative, width = 6, height = 4)
