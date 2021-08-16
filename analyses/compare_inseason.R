@@ -16,7 +16,7 @@ pilotsonar <- read_csv("data/pilotsonar.csv")
 # Munge
 beset$source <- "LYTFSET"
 bedrift$source <- "LYTFDRIFT"
-pilotsonar$source <- "PILOTPLUS3D"
+pilotsonar$source <- "PILOMINUS3D"
 
 # Offset pilotsonar by 3 days to account for travel time
 pilotsonar$day <- pilotsonar$day - 3
