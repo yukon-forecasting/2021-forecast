@@ -47,7 +47,7 @@ comparison <- ggplot(all_sites, aes(day, count, linetype = source)) +
   labs(x = "Day of June",
        y = "% of Total")
 comparison
-ggsave("analyses/figures/comparison.png", comparison, width = 6, height = 2)
+ggsave("analyses/figures/comparison.png", comparison, width = 10, height = 2)
 
 # Compare cumulative
 all_sites %>%
